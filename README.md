@@ -3,8 +3,10 @@ ASCII Warehouse React Redux
 Task for job interview ascii warehouse using React.js
 Instructions :
 - Install dependencies `npm install`
-- Run development server `npm run dev:server`
-- Run react scripts `npm run start`
+- Run development server `npm run dev:server` from this repo https://github.com/putridamayanti/ascii-warehouse-react
+- Run react native scripts `react-native run-android`
+
+Ps: Change `BASE_URL` on `app/constants/Api` with your server dev host and port
 
 Products Grid
 ====

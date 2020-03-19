@@ -1,24 +1,32 @@
 import React from 'react';
-import { ScrollView, View, StyleSheet, Image } from 'react-native';
-import { Content, Text, Card, CardItem, Body } from 'native-base';
+import { View, StyleSheet, Image } from 'react-native';
+import { Content, Text, Picker, Icon } from 'native-base';
 
 import { connect } from 'react-redux';
 
-import { fetchProducts } from "../actions/ProductAction";
+import { fetchProducts } from '../actions/ProductAction';
 import { fetchAds } from "../actions/AdsAction";
+
+import ProductList from '../components/ProductList';
+import Loading from '../components/Loading';
+import EndCatalogue from '../components/EndCatalogue';
 
 const styles = StyleSheet.create({
     container: {
         padding: 15,
     },
     header: {
-        height: 200,
-        textAlign: 'center'
+        flex: 1,
+        padding: 15,
+        height: 350,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#c9eb34'
     },
     mainAds: {
-        width: 300,
-        height: 100
-    }
+        width: 200,
+        height: 150,
+    },
 });
 
 class ProductScreen extends React.Component {
@@ -28,7 +36,10 @@ class ProductScreen extends React.Component {
 
         this.state = {
             ads: '',
-            products: []
+            page: 0,
+            sort: 'id',
+            products: [],
+            end: false
         }
     }
 
@@ -38,32 +49,66 @@ class ProductScreen extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
-        if (state.products.length === 0 || state.sort !== props.sort) {
-            return {
-                products: props.products
-            }
-        }
-
         if (state.ads === '') {
             return {
                 ads: props.ads
             }
         }
 
+        if (props.products.length === 0) {
+            return {
+                end: true
+            }
+        }
+
+        if (state.products.length === 0 || state.sort !== props.sort) {
+            return {
+                products: props.products,
+                page: state.page+1
+            }
+        } else {
+            const products = [];
+            state.products.forEach(item => {
+                products.push(item);
+            });
+            props.products.forEach(item => {
+                products.push(item);
+            });
+            return {
+                products: products,
+                page: state.page+1
+            }
+        }
+
         return null;
     }
 
+    isCloseToBottom({ layoutMeasurement, contentOffset, contentSize }) {
+        return layoutMeasurement.height + contentOffset.y >= contentSize.height - 1;
+    }
+
+    onValueChange(value: string) {
+        this.props.fetchProducts(0, value);
+        this.setState({
+            products: [],
+            sort: value,
+            page: 0
+        });
+    }
+
     render() {
-        const { products, ads } = this.props;
         return (
-            <ScrollView>
+            <Content onScroll={({ nativeEvent }) => {
+                if (this.isCloseToBottom(nativeEvent)) {
+                    this.props.fetchProducts(this.state.page, this.state.sort);
+                }
+            }}>
                 <View style={ styles.container }>
                     <View style={styles.header}>
-                        <Text>Products Grid</Text>
-                        <Text>Here you're sure to find a bargain on some of the finest ascii available to purchase. Be sure to
+                        <Text style={{ fontSize: 16, margin: 15}}>Products Grid</Text>
+                        <Text style={{ textAlign: 'center' }}>Here you're sure to find a bargain on some of the finest ascii available to purchase. Be sure to
                             peruse our selection of ascii faces in an exciting range of sizes and prices.</Text>
-                        <Text>But first, a word from our sponsors:</Text>
-                        <Image source={ this.state.ads }/>
+                        <Text style={{ marginVertical: 15 }}>But first, a word from our sponsors:</Text>
                         { this.state.ads !== '' && <Image
                             style={ styles.mainAds }
                             source={{ uri:  this.state.ads}}
@@ -71,28 +116,27 @@ class ProductScreen extends React.Component {
                     </View>
 
                     <View>
-                        { products.map((item, i) => {
-                            return(
-                                <Card key={i}>
-                                    <CardItem>
-                                        <Body>
-                                        <Text>
-                                            { item.face }
-                                        </Text>
-                                        <Text>
-                                            { item.price }
-                                        </Text>
-                                        </Body>
-                                    </CardItem>
-                                    <CardItem footer>
-                                        <Text>GeekyAnts</Text>
-                                    </CardItem>
-                                </Card>
-                            )
-                        })}
+                        <Text>Sort By :</Text>
+                        <Picker
+                            mode="dropdown"
+                            iosHeader="Sort By"
+                            style={{ width: undefined, borderWidth: 1, borderColor: '#ccc', borderStyle: 'solid' }}
+                            selectedValue={this.state.sort}
+                            onValueChange={this.onValueChange.bind(this)}
+                        >
+                            <Picker.Item label="Id" value="id" />
+                            <Picker.Item label="Size" value="size" />
+                            <Picker.Item label="Price" value="price" />
+                        </Picker>
+                    </View>
+
+                    <View>
+                        <ProductList products={ this.state.products }/>
+                        { this.props.loading && <Loading/> }
+                        { this.state.end && <EndCatalogue/> }
                     </View>
                 </View>
-            </ScrollView>
+            </Content>
         );
     }
 }

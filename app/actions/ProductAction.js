@@ -1,7 +1,6 @@
 import { BASE_URL } from '../constants/Api';
 
 export function fetchProducts(page = 0, sort = 'id') {
-    console.log(BASE_URL + 'api/products?limit=10&skip=' + page + '&sort=' + sort);
     return async dispatch => {
         dispatch({
             type: 'FETCH',
