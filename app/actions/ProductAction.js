@@ -5,7 +5,7 @@ export function fetchProducts(page = 0, sort = 'id') {
         dispatch({
             type: 'FETCH',
         });
-        fetch(BASE_URL + 'api/products?limit=10&skip=' + page + '&sort=' + sort)
+        fetch(BASE_URL + 'api/products?limit=5&skip=' + page + '&sort=' + sort)
             .then(result => {
                 if (result.status === 200) {
                     return result.json();

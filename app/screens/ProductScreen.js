@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     },
     mainAds: {
         width: 200,
-        height: 150,
+        height: 100,
     },
 });
 
@@ -49,38 +49,32 @@ class ProductScreen extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
+        let newState = state;
         if (state.ads === '') {
-            return {
-                ads: props.ads
-            }
+            newState.ads = props.ads;
         }
 
         if (props.products.length === 0) {
-            return {
-                end: true
-            }
-        }
-
-        if (state.products.length === 0 || state.sort !== props.sort) {
-            return {
-                products: props.products,
-                page: state.page+1
-            }
+            newState.end    = true;
         } else {
-            const products = [];
-            state.products.forEach(item => {
-                products.push(item);
-            });
-            props.products.forEach(item => {
-                products.push(item);
-            });
-            return {
-                products: products,
-                page: state.page+1
+            newState.end    = false;
+            if (state.products.length === 0 || state.sort !== props.sort) {
+                newState.products   = props.products;
+                newState.page       = state.page + 1;
+            } else {
+                const products = [];
+                state.products.forEach(item => {
+                    products.push(item);
+                });
+                props.products.forEach(item => {
+                    products.push(item);
+                });
+                newState.products   = products;
+                newState.page       = state.page + 1;
             }
         }
 
-        return null;
+        return newState;
     }
 
     isCloseToBottom({ layoutMeasurement, contentOffset, contentSize }) {
@@ -115,7 +109,7 @@ class ProductScreen extends React.Component {
                         />}
                     </View>
 
-                    <View>
+                    <View style={{ marginTop: 20 }}>
                         <Text>Sort By :</Text>
                         <Picker
                             mode="dropdown"
@@ -145,6 +139,7 @@ function mapStateToProps(state) {
     return {
         ads         : state.adsStore.ads,
         products    : state.productStore.products,
+        sort        : state.productStore.sort,
         loading     : state.productStore.loading,
         error       : state.productStore.error
     }

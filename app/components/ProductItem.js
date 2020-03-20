@@ -22,11 +22,13 @@ export default class ProductItem extends React.Component{
                     <Text>
                         { price }
                     </Text>
+                    <Text>
+                        Size : { size }
+                    </Text>
                     </Body>
                 </CardItem>
                 <CardItem footer style={styles.footer}>
                     <Text>{ date }</Text>
-                    <Text>Size : { size }</Text>
                 </CardItem>
             </Card>
         );
